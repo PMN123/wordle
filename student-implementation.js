@@ -304,9 +304,10 @@ function validateInput(key, currentGuess) {
         return currentGuess.length < WORD_LENGTH;
     }
 
-    // Enter requires full guess
+    // Always allow ENTER to reach the handler
+    // The handler will show an error and shake the row if the guess is incomplete
     if (key === 'ENTER') {
-        return currentGuess.length === WORD_LENGTH;
+        return true;
     }
 
     // Backspace requires something to delete
