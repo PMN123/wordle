@@ -32,7 +32,7 @@ function initializeGame() {
     gameWon = false;
 
     // Reset board UI
-    resetBoard?.();
+    resetBoard();
 
     // Hide messages and modal
     const msg = document.getElementById('message');
@@ -40,7 +40,7 @@ function initializeGame() {
         msg.textContent = '';
         msg.classList.add('hidden');
     }
-    hideModal?.();
+    hideModal();
 }
 
 /**
@@ -85,8 +85,8 @@ function handleKeyPress(key) {
     // Enter handling
     if (K === 'ENTER') {
         if (!isGuessComplete()) {
-            showMessage?.('Not enough letters', 'error');
-            shakeRow?.(currentRow);
+            showMessage('Not enough letters', 'error');
+            shakeRow(currentRow);
             return;
         }
         submitGuess();
@@ -105,8 +105,8 @@ function handleKeyPress(key) {
  */
 function submitGuess() {
     if (!isGuessComplete()) {
-        showMessage?.('Not enough letters', 'error');
-        shakeRow?.(currentRow);
+        showMessage('Not enough letters', 'error');
+        shakeRow(currentRow);
         return;
     }
 
@@ -114,8 +114,8 @@ function submitGuess() {
     const target = currentWord.toUpperCase();
 
     if (!WordleWords.isValidWord(guess)) {
-        showMessage?.('Not in word list', 'error');
-        shakeRow?.(currentRow);
+        showMessage('Not in word list', 'error');
+        shakeRow(currentRow);
         return;
     }
 
@@ -245,31 +245,10 @@ function updateGameState(isCorrect) {
  * - Don't downgrade key colors
  */
 function updateKeyboardColors(guess, results) {
-    const priority = { absent: 0, present: 1, correct: 2 };
-
     for (let i = 0; i < guess.length; i++) {
         const letter = guess[i];
         const state = results[i];
-
-        // Prefer built-in helper if available
-        if (typeof updateKeyboardKey === 'function') {
-            updateKeyboardKey(letter, state);
-            continue;
-        }
-
-        // Fallback: manipulate DOM directly
-        const keyEl = document.querySelector(`[data-key="${letter}"]`);
-        if (!keyEl) continue;
-
-        const hasCorrect = keyEl.classList.contains('correct');
-        const hasPresent = keyEl.classList.contains('present');
-
-        // Do not downgrade colors
-        if (hasCorrect && state !== 'correct') continue;
-        if (hasPresent && state === 'absent') continue;
-
-        keyEl.classList.remove('absent', 'present', 'correct');
-        keyEl.classList.add(state);
+        updateKeyboardKey(letter, state);
     }
 }
 
@@ -284,7 +263,7 @@ function updateKeyboardColors(guess, results) {
 function processRowReveal(rowIndex, results) {
     const allCorrect = results.every(s => s === 'correct');
     if (allCorrect) {
-        celebrateRow?.(rowIndex);
+        celebrateRow(rowIndex);
     }
 }
 
@@ -299,22 +278,12 @@ function processRowReveal(rowIndex, results) {
  */
 function showEndGameModal(won, targetWord) {
     // Update stats first
-    updateStats?.(won);
+    updateStats(won);
 
     // Guesses used if win (1-based)
     const guessesUsed = won ? (currentRow + 1) : undefined;
 
-    // Show the modal via helper; it will set messaging and word
-    if (typeof showModal === 'function') {
-        showModal(won, targetWord, guessesUsed);
-    } else {
-        // Fallback message element
-        const msg = document.getElementById('message');
-        if (msg) {
-            msg.textContent = won ? `You won in ${guessesUsed} guesses!` : `The word was ${targetWord}.`;
-            msg.classList.remove('hidden');
-        }
-    }
+    showModal(won, targetWord, guessesUsed);
 }
 
 /**
